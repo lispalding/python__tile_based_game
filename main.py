@@ -36,6 +36,16 @@ class Game(object):
         # Setting repeat variable
         pg.key.set_repeat(500, 100)
 
+        self.loadData()
+
+    def loadData(self):
+        """ To use: self.loadData()
+        This method creates data for maps. """
+        self.mapData = []
+        with open(path.join(mapsFolder, "map.txt"), "rt") as f:
+            for line in f:
+                self.mapData.append(line)
+
     def new(self):
         """ To use: self.new()
         This method creates a new game. """
@@ -51,8 +61,11 @@ class Game(object):
         self.allSprites.add(self.player)
         self.playerGroup.add(self.player)
 
-        for x in range(10, 20):
-            Wall(self, x, 5)
+        # Spawning walls
+        for row, tiles in enumerate(self.mapData):
+            for col, tile in enumerate(tiles):
+                if tile == "1":
+                    Wall(self, col, row)
 
         # Start running game loop...
         self.run()

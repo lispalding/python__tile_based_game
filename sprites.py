@@ -37,14 +37,16 @@ class Player(pg.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
 
-        self.keypressed = False
-
-    def togglePressed(self):
-        self.keypressed = False
-
     def move(self, dx= 0, dy = 0):
-        self.x += dx
-        self.y += dy
+        if not self.collideWithWalls(dx, dy):
+            self.x += dx
+            self.y += dy
+
+    def collideWithWalls(self, dx = 0, dy = 0):
+        for wall in self.game.walls:
+            if wall.x == self.x + dx and wall.y == self.y + dy:
+                return True
+        return False
 
     def update(self):
         """ To use: self.update()

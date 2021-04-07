@@ -32,6 +32,12 @@ GRID_HEIGHT = HEIGHT / TILE_SIZE
 ######### FOLDER SETUP #########
 gameFolder = path.dirname(__file__) # General folder set-up
 
+# Map folder
+mapsFolder = path.join(gameFolder, "maps")
+
+## Individual maps folders
+map1File = path.join(mapsFolder, "map.txt")
+
 # Basic image folders
 imageFolder = path.join(gameFolder, "images")
 playerImages = path.join(imageFolder, "player_image")
