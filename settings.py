@@ -7,7 +7,7 @@
 ################### IMPORTS ####################
 import pygame as pg
 import random as r
-from os import *
+from os import path
 ################### FINISHED ###################
 
 ########## BASIC VARIABLES ###########
