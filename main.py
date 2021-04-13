@@ -42,7 +42,7 @@ class Game(object):
     def loadData(self):
         """ To use: self.loadData()
         This method creates data for maps. """
-        self.map = Map(path.join(mapsFolder, "map.txt"))
+        self.map = Map(path.join(mapsFolder, "example_map1__large.txt"))
 
     def new(self):
         """ To use: self.new()
