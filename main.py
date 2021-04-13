@@ -2,7 +2,7 @@
 # FILE NAME: main.py
 # PROJECT NAME: python__tile_based_game
 # DATE CREATED: 04/07/2021
-# DATE LAST MODIFIED: 04/07/2021
+# DATE LAST MODIFIED: 04/13/2021
 # PYTHON VER. USED: 3.8
 
 ################### IMPORTS ####################
@@ -13,6 +13,7 @@ from os import path
 # Custom Imports
 from settings import *
 from sprites import *
+from tilemap import *
 ################### FINISHED ###################
 
 ################ MAIN GAME LOOP ################
@@ -41,10 +42,7 @@ class Game(object):
     def loadData(self):
         """ To use: self.loadData()
         This method creates data for maps. """
-        self.mapData = []
-        with open(path.join(mapsFolder, "map.txt"), "rt") as f:
-            for line in f:
-                self.mapData.append(line)
+        self.map = Map(path.join(mapsFolder, "map.txt"))
 
     def new(self):
         """ To use: self.new()
@@ -56,16 +54,23 @@ class Game(object):
         self.walls = pg.sprite.Group() # The Walls group
 
         ## Creating the game objects
-        self.player = Player(self, 10, 10)
-        # Adding player to sprite groups
-        self.allSprites.add(self.player)
-        self.playerGroup.add(self.player)
 
         # Spawning walls
-        for row, tiles in enumerate(self.mapData):
+        for row, tiles in enumerate(self.map.data): # Where the "enumerate" uses both index number and list item
             for col, tile in enumerate(tiles):
                 if tile == "1":
                     Wall(self, col, row)
+
+                if tile == "P":
+                    self.player = Player(self, col, row)
+
+                    # Adding player to sprite groups
+                    self.allSprites.add(self.player)
+                    self.playerGroup.add(self.player)
+
+        # Spawning camera
+        self.camera = Camera(self.map.width, self.map.height)
+
 
         # Start running game loop...
         self.run()
@@ -77,7 +82,7 @@ class Game(object):
         self.playing = True
 
         while self.playing:
-            self.clock.tick(FPS)
+            self.dt = self.clock.tick(FPS) / 1000
 
             # Processing input events
             self.events()
@@ -102,20 +107,21 @@ class Game(object):
                 if event.key == pg.K_ESCAPE:
                     self.playing = False
 
-                # Movement events:
-                if event.key == pg.K_LEFT:
-                    self.player.move(dx = -1)
-                if event.key == pg.K_RIGHT:
-                    self.player.move(dx = 1)
-                if event.key == pg.K_UP:
-                    self.player.move(dy = -1)
-                if event.key == pg.K_DOWN:
-                    self.player.move(dy = 1)
+                # Movement events: .. NOT NEEDED ..
+                # if event.key == pg.K_LEFT:
+                #     self.player.move(dx = -1)
+                # if event.key == pg.K_RIGHT:
+                #     self.player.move(dx = 1)
+                # if event.key == pg.K_UP:
+                #     self.player.move(dy = -1)
+                # if event.key == pg.K_DOWN:
+                #     self.player.move(dy = 1)
 
     def update(self):
         """ To use: self.update()
         This method updates what is shown on the HUD. """
         self.allSprites.update()
+        self.camera.update(self.player)
 
     def drawGrid(self):
         """ To use: self.drawGrid()
@@ -134,7 +140,8 @@ class Game(object):
         self.drawGrid()
         ## FIN
 
-        self.allSprites.draw(self.screen)
+        for sprite in self.allSprites:
+            self.screen.blit(sprite.image, self.camera.apply(sprite))
 
         ## This is the very last thing to happen during the draw:
         pg.display.flip()

@@ -1,7 +1,7 @@
 # MADE BY: Lisette Spalding
 # FILE NAME: main.py
 # DATE CREATED: 02/25/2021
-# DATE LAST MODIFIED: 02/25/2021
+# DATE LAST MODIFIED: 04/13/2021
 # PYTHON VER. USED: 3.8
 
 ################### IMPORTS ####################
@@ -28,6 +28,10 @@ TILE_SIZE = 32
 GRID_WIDTH = WIDTH / TILE_SIZE
 GRID_HEIGHT = HEIGHT / TILE_SIZE
 ############## FINISHED ##############
+
+########## PLAYER VARIABLES ###########
+PLAYER_SPEED = 250
+############## FINISHED ###############
 
 ######### FOLDER SETUP #########
 gameFolder = path.dirname(__file__) # General folder set-up
