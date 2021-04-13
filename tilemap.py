@@ -22,7 +22,7 @@ class Map:
 
         with open(filename, "rt") as f:
             for line in f:
-                self.data.append(line)
+                self.data.append(line.strip())
 
         # Obtaining the tile width & height
         self.tileWidth = len(self.data[0])
@@ -51,6 +51,12 @@ class Camera:
         This is the method that keeps the map/camera updated as the player moves. """
         x = -target.rect.x + int(WIDTH / 2)
         y = -target.rect.y + int(HEIGHT / 2)
+
+        # Limiting scrolling to map size
+        x = min(0, x) # Left limit
+        y = min(0, y) # Top limit
+        x = max(-(self.width - WIDTH), x) # Right limit
+        y = max(-(self.height - HEIGHT), y) # Bottom limit
 
         # Adjusting the camera rectangle
         self.camera = pg.Rect(x, y, self.width, self.height)
