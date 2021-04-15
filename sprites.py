@@ -103,26 +103,6 @@ class Player(pg.sprite.Sprite):
         self.rect.y = self.y
         self.collideWithWalls("y")
 
-
-        ########## .!. MOUSE CLICK AND DRAG
-        if mouseBttnHeld:
-            self.rect.center = (mousex, mousey)
-        ########## .!. MOUSE CLICK AND DRAG FIN
-
-        ######### !!!! .. MOUSE FINISHED .. !!!! ##########
-
-        ##### !!!! .. SCREEN BINDING .. !!!! #####
-        # We are binding the player to the screen area
-        if self.rect.left <= 0:
-            self.rect.left = 0
-        if self.rect.top <= 0:
-            self.rect.top = 0
-        if self.rect.bottom >= HEIGHT:
-            self.rect.bottom = HEIGHT
-        if self.rect.right >= WIDTH:
-            self.rect.right = WIDTH
-        ##### !!!! .. BINDING FINISH .. !!!! #####
-
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         # Setting up the groups
