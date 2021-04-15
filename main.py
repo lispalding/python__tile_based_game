@@ -107,7 +107,7 @@ class Game(object):
                 if event.key == pg.K_ESCAPE:
                     self.playing = False
 
-                # Movement events: .. NOT NEEDED ..
+                # Movement events: .. --NOT NEEDED-- ..
                 # if event.key == pg.K_LEFT:
                 #     self.player.move(dx = -1)
                 # if event.key == pg.K_RIGHT:
