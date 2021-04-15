@@ -30,6 +30,8 @@ GRID_HEIGHT = HEIGHT / TILE_SIZE
 
 PLAYER_WIDTH = 64
 PLAYER_HEIGHT = 64
+
+PLAYER_IMAGE = ""
 ############## FINISHED ##############
 
 ########## PLAYER VARIABLES ###########
@@ -47,7 +49,6 @@ map1File = path.join(mapsFolder, "map.txt")
 
 # Basic image folders
 imageFolder = path.join(gameFolder, "images")
-playerImages = path.join(imageFolder, "player_image")
 
 # Basic sound folder
 soundFolder = path.join(gameFolder, "sounds")

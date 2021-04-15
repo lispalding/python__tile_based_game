@@ -44,6 +44,10 @@ class Game(object):
         This method creates data for maps. """
         self.map = Map(path.join(mapsFolder, "example_map1__large.txt"))
 
+        # Loading player image
+        imgs = path.join(imageFolder, "Preview_110.png")
+        self.playerImage = pg.image.load(imgs).convert_alpha()
+
     def new(self):
         """ To use: self.new()
         This method creates a new game. """
