@@ -23,10 +23,13 @@ title = "Python Tile Game"
 ############## FINISHED ##############
 
 ########## GAME VARIABLES ###########
-TILE_SIZE = 32
+TILE_SIZE = 64
 
 GRID_WIDTH = WIDTH / TILE_SIZE
 GRID_HEIGHT = HEIGHT / TILE_SIZE
+
+PLAYER_WIDTH = 64
+PLAYER_HEIGHT = 64
 ############## FINISHED ##############
 
 ########## PLAYER VARIABLES ###########

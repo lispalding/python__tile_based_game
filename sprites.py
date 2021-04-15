@@ -5,14 +5,18 @@
 # DATE LAST MODIFIED: 04/13/2021
 # PYTHON VER. USED: 3.8
 
-################### IMPORTS ####################
+##################### IMPORTS ######################
 import pygame as pg
 import random as r
 from os import path
 
 # Custom imports
 from settings import *
-################### FINISHED ###################
+##################### FINISHED #####################
+
+################### GLOBAL VAR ####################
+vec = pg.math.Vector2
+##################### FINISHED #####################
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -23,41 +27,52 @@ class Player(pg.sprite.Sprite):
 
         self.game = game
 
-        self.image = pg.Surface((32, 32))
+        self.image = pg.Surface((PLAYER_WIDTH, PLAYER_HEIGHT))
         self.image.fill(PURPLE)
 
         # self.image = playerImage
 
         self.rect = self.image.get_rect()
 
-        ## Placement
-        # self.rect.center = (WIDTH/2, HEIGHT/2)
-        self.vx, self.vy = 0, 0
-        self.x = x * TILE_SIZE
-        self.y = y * TILE_SIZE
-        ## Placement FIN
+        # Including vectors for movement and positioning
+        self.velocity = vec(0, 0)
+        self.position = vec(x, y) * TILE_SIZE
 
-        self.speedx = 0
-        self.speedy = 0
+        ## Traditional Placement, speed, etc
+        # # self.rect.center = (WIDTH/2, HEIGHT/2)
+        # self.vx, self.vy = 0, 0
+        # self.x = x * TILE_SIZE
+        # self.y = y * TILE_SIZE
+        # ## Placement FIN
+        #
+        # self.speedx = 0
+        # self.speedy = 0
 
     def getKeys(self):
         """ To use: self.getKeys()
         This is the method that acquires the keys pressed and determines what to do """
-        self.vx, self.vy = 0, 0
+        self.velocity = vec(0, 0)
 
         keys = pg.key.get_pressed() # Obtaining the key pressed
-        # If the key pressed  is the left arrow key OR the "a" key, then do this:
+        # If the key pressed is the left arrow key OR the "a" key, then do this:
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vx = -PLAYER_SPEED
+            self.velocity.x = -PLAYER_SPEED
+
+        # If the key pressed is the right arrow key OR the "d" key, then do this:
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vx = PLAYER_SPEED
+            self.velocity.x = PLAYER_SPEED
+
+        # If the key pressed is the up arrow key OR the "w" key, then do this:
         if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vy = -PLAYER_SPEED
+            self.velocity.y = -PLAYER_SPEED
+
+        # If the key pressed is the down arrow key  or the "s" key, do this:
         if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vy = PLAYER_SPEED
-        if self.vx != 0 and self.vy != 0:
-            self.vx *= 0.7071
-            self.vy *= 0.7071
+            self.velocity.y = PLAYER_SPEED
+
+        # If the x velocity does not equal 0 and the y velocity does not equal zero, do this:
+        if self.velocity.x != 0 and self.velocity.y != 0:
+            self.velocity *= 0.7071
 
     def collideWithWalls(self, dir):
         """ To use: self.collideWithWalls(dir)
@@ -65,21 +80,23 @@ class Player(pg.sprite.Sprite):
         if dir == "x":
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                if self.vx > 0:
-                    self.x = hits[0].rect.left - self.rect.width
-                if self.vx < 0:
-                    self.x = hits[0].rect.right
-                self.vx = 0
-                self.rect.x = self.x
+                if self.velocity.x > 0:
+                    self.position.x = hits[0].rect.left - self.rect.width
+                if self.velocity.x < 0:
+                    self.position.x = hits[0].rect.right
+
+                self.velocity.x = 0
+                self.rect.x = self.position.x
         if dir == "y":
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                if self.vy > 0:
-                    self.y = hits[0].rect.top - self.rect.height
-                if self.vy < 0:
-                    self.y = hits[0].rect.bottom
-                self.vy = 0
-                self.rect.y = self.y
+                if self.velocity.y > 0:
+                    self.position.y = hits[0].rect.top - self.rect.height
+                if self.velocity.y < 0:
+                    self.position.y = hits[0].rect.bottom
+
+                self.velocity.y = 0
+                self.rect.y = self.position.y
 
     def update(self):
         """ To use: self.update()
@@ -94,13 +111,13 @@ class Player(pg.sprite.Sprite):
         ## Custom movement:
         self.getKeys()
 
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
+        self.position += self.velocity * self.game.dt
 
         # Setting up wall collision
-        self.rect.x = self.x
+        self.rect.x = self.position.x
         self.collideWithWalls("x")
-        self.rect.y = self.y
+
+        self.rect.y = self.position.y
         self.collideWithWalls("y")
 
 class Wall(pg.sprite.Sprite):
