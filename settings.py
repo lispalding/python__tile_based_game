@@ -10,35 +10,32 @@ import random as r
 from os import path
 ################### FINISHED ###################
 
-########## BASIC VARIABLES ###########
+############### BASIC VARIABLES ################
 WIDTH = 1024
 HEIGHT = 768
 FPS = 60
 
-# Mouse button - Held?
-mouseBttnHeld = False
-
 # Title
-title = "Python Tile Game"
-############## FINISHED ##############
+title = "Tilemap Game"
+################### FINISHED ###################
 
-########## GAME VARIABLES ###########
+############### GAME VARIABLES ################
 TILE_SIZE = 64
 
 GRID_WIDTH = WIDTH / TILE_SIZE
 GRID_HEIGHT = HEIGHT / TILE_SIZE
+################### FINISHED ###################
+
+############## PLAYER VARIABLES ################
+PLAYER_SPEED = 250
 
 PLAYER_WIDTH = 64
 PLAYER_HEIGHT = 64
 
 PLAYER_IMAGE = ""
-############## FINISHED ##############
+################### FINISHED ###################
 
-########## PLAYER VARIABLES ###########
-PLAYER_SPEED = 250
-############## FINISHED ###############
-
-######### FOLDER SETUP #########
+################# FOLDER SETUP #################
 gameFolder = path.dirname(__file__) # General folder set-up
 
 # Map folder
@@ -55,9 +52,9 @@ soundFolder = path.join(gameFolder, "sounds")
 
 # Basic text data folder
 textDataFolder = path.join(gameFolder, "text_data")
-########### FINISHED ###########
+################### FINISHED ###################
 
-###### COLORS  (R. G. B) ######
+############## COLORS  (R. G. B) ###############
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -74,4 +71,4 @@ YELLOW = (245, 233, 154)
 LIGHT_GREY = (100, 100, 100)
 YELLOW_GREEN = (182, 219, 18)
 LIGHT_BLUE = (100, 162, 209)
-############# FIN #############
+################### FINISHED ###################
