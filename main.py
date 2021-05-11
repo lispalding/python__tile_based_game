@@ -1,9 +1,10 @@
 # MADE BY: Lisette Spalding
+# ART WORK CREDIT: "Kenney.nl" @ "www.kenney.nl"
 # FILE NAME: main.py
 # PROJECT NAME: python__tile_based_game
 # DATE CREATED: 04/07/2021
-# DATE LAST MODIFIED: 04/13/2021
-# PYTHON VER. USED: 3.8
+# DATE LAST MODIFIED: 05/11/2021
+# PYTHON VER. USED: 3.x
 
 ################### IMPORTS ####################
 import pygame as pg
@@ -42,11 +43,12 @@ class Game(object):
     def loadData(self):
         """ To use: self.loadData()
         This method creates data for maps. """
-        self.map = Map(path.join(mapsFolder, "example_map1__large.txt"))
+        self.map = Map(path.join(mapsFolder, "example_map2__large.txt"))
 
-        # Loading player image
-        imgs = path.join(imageFolder, "Preview_110.png")
-        self.playerImage = pg.image.load(imgs).convert_alpha()
+        # Loading spritesheet image
+        self.spritesheet = Spritesheet(path.join(spritesheetImgFolder, CHARACTERS_SPRITESHEET))
+
+        self.playerImage = pg.image.load(path.join(manBlueImageFolder, PLAYER_IMAGE)).convert_alpha()
 
     def new(self):
         """ To use: self.new()
@@ -138,7 +140,8 @@ class Game(object):
     def draw(self):
         """ To use: self.draw()
         This method draws the content on the screen. """
-        self.screen.fill(BLACK)
+        pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
+        self.screen.fill(BG_COLOR)
 
         ## Customizing the draw() method for a tile-based game:
         self.drawGrid()

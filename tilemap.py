@@ -1,9 +1,10 @@
 # MADE BY: Lisette Spalding
+# ART WORK CREDIT: "Kenney.nl" @ "www.kenney.nl"
 # FILE NAME: tilemap.py
-# PROJECT NAME: pygame__advanced_starter_template
+# PROJECT NAME: python__tile_based_game
 # DATE CREATED: 04/13/2021
-# DATE LAST MODIFIED: 04/13/2021
-# PYTHON VER. USED: 3.8
+# DATE LAST MODIFIED: 05/11/2021
+# PYTHON VER. USED: 3.x
 
 ################### IMPORTS ####################
 import pygame as pg
@@ -13,6 +14,11 @@ from os import path
 # Custom imports
 from settings import *
 ################### FINISHED ###################
+
+# Move this later:
+def collideHitRect(spriteOne, spriteTwo):
+    return spriteOne.hitRect.colliderect(spriteTwo.rect)
+# Move FIN
 
 class Map:
     """ To use: Map()
@@ -49,8 +55,8 @@ class Camera:
     def update(self, target):
         """ To use: self.update(target)
         This is the method that keeps the map/camera updated as the player moves. """
-        x = -target.rect.x + int(WIDTH / 2)
-        y = -target.rect.y + int(HEIGHT / 2)
+        x = -target.rect.centerx + int(WIDTH / 2)
+        y = -target.rect.centery + int(HEIGHT / 2)
 
         # Limiting scrolling to map size
         x = min(0, x) # Left limit
