@@ -48,7 +48,15 @@ class Game(object):
         # Loading spritesheet image
         self.spritesheet = Spritesheet(path.join(spritesheetImgFolder, CHARACTERS_SPRITESHEET))
 
+        # Loading individual player image
         self.playerImage = pg.image.load(path.join(manBlueImageFolder, PLAYER_IMAGE)).convert_alpha()
+
+        ## Loading individual zombie image
+        self.zombieImage = pg.image.load(path.join(zombieImageFolder, ZOMBIE_IMAGE)).convert_alpha()
+
+        # Loading individual wall tiles
+        self.wallImage = pg.image.load(path.join(wallImageFolder, WALL_IMAGE)).convert_alpha()
+        self.wallImage = pg.transform.scale(self.wallImage, (TILE_SIZE, TILE_SIZE))
 
     def new(self):
         """ To use: self.new()
@@ -59,6 +67,8 @@ class Game(object):
 
         self.walls = pg.sprite.Group() # The Walls group
 
+        self.zombieGroup = pg.sprite.Group() # The Zombie group
+
         ## Creating the game objects
 
         # Spawning walls
@@ -66,6 +76,9 @@ class Game(object):
             for col, tile in enumerate(tiles):
                 if tile == "1":
                     Wall(self, col, row)
+
+                if tile == "M":
+                    Zombie(self, col, row)
 
                 if tile == "P":
                     self.player = Player(self, col, row)
@@ -144,7 +157,7 @@ class Game(object):
         self.screen.fill(BG_COLOR)
 
         ## Customizing the draw() method for a tile-based game:
-        self.drawGrid()
+        # self.drawGrid()
         ## FIN
 
         for sprite in self.allSprites:

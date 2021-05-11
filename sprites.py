@@ -20,6 +20,34 @@ from tilemap import collideHitRect
 vec = pg.math.Vector2
 ##################### FINISHED #####################
 
+################ GLOBAL FUNCTIONS ##################
+def collideWithWalls(sprite, group, dir):
+    """ To use: self.collideWithWalls(dir)
+    This is the method that checks to see if the player has collided with a wall, and how to deal with it. """
+    if dir == "x":
+        hits = pg.sprite.spritecollide(sprite, group, False, collideHitRect)
+        if hits:
+            if sprite.velocity.x > 0:
+                sprite.position.x = hits[0].rect.left - sprite.hitRect.width / 2
+            if sprite.velocity.x < 0:
+                sprite.position.x = hits[0].rect.right + sprite.hitRect.width / 2
+
+            sprite.velocity.x = 0
+            sprite.hitRect.centerx = sprite.position.x
+
+    if dir == "y":
+        hits = pg.sprite.spritecollide(sprite, group, False, collideHitRect)
+        if hits:
+            if sprite.velocity.y > 0:
+                sprite.position.y = hits[0].rect.top - sprite.hitRect.height / 2
+            if sprite.velocity.y < 0:
+                sprite.position.y = hits[0].rect.bottom + sprite.hitRect.height / 2
+
+            sprite.velocity.y = 0
+            sprite.hitRect.centery = sprite.position.y
+##################### FINISHED #####################
+
+##################### CLASSES ######################
 class Spritesheet():
     """ To use: Spritesheet()
         This class will parse and load spritesheets. """
@@ -100,30 +128,6 @@ class Player(pg.sprite.Sprite):
         # if self.velocity.x != 0 and self.velocity.y != 0:
         #     self.velocity *= 0.7071
 
-    def collideWithWalls(self, dir):
-        """ To use: self.collideWithWalls(dir)
-        This is the method that checks to see if the player has collided with a wall, and how to deal with it. """
-        if dir == "x":
-            hits = pg.sprite.spritecollide(self, self.game.walls, False, collideHitRect)
-            if hits:
-                if self.velocity.x > 0:
-                    self.position.x = hits[0].rect.left - self.hitRect.width / 2
-                if self.velocity.x < 0:
-                    self.position.x = hits[0].rect.right + self.hitRect.width / 2
-
-                self.velocity.x = 0
-                self.hitRect.centerx = self.position.x
-        if dir == "y":
-            hits = pg.sprite.spritecollide(self, self.game.walls, False, collideHitRect)
-            if hits:
-                if self.velocity.y > 0:
-                    self.position.y = hits[0].rect.top - self.hitRect.height / 2
-                if self.velocity.y < 0:
-                    self.position.y = hits[0].rect.bottom + self.hitRect.height / 2
-
-                self.velocity.y = 0
-                self.hitRect.centery = self.position.y
-
     def update(self):
         """ To use: self.update()
         This is the method that will update the movement of the player character. """
@@ -150,14 +154,66 @@ class Player(pg.sprite.Sprite):
 
         # Setting up wall collision
         self.hitRect.centerx = self.position.x
-        self.collideWithWalls("x")
+        collideWithWalls(self, self.game.walls, "x")
 
         self.hitRect.centery = self.position.y
-        self.collideWithWalls("y")
+        collideWithWalls(self, self.game.walls, "y")
 
         self.rect.center = self.hitRect.center
 
+class Zombie(pg.sprite.Sprite):
+    """ To use: Zombie()
+    This class will create an NPC (In this case, a zombie). """
+    def __init__(self, game, x, y):
+        # Setting up the groups
+        self.groups = game.allSprites, game.zombieGroup
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.game = game
+
+        self.image = game.zombieImage
+        self.rect = self.image.get_rect() # Setting up the rectangle
+        self.hitRect = ZOMBIE_HIT_RECT.copy()
+        self.hitRect.center = self.rect.center
+
+        # Setting up movement:
+        self.position = vec(x, y) * TILE_SIZE
+        self.velocity = vec(0, 0)
+        self.acceleration = vec(0, 0)
+
+        # Setting up spawn point(s):
+        self.rect.center = self.position
+
+        # Setting up the zombie movement
+        self.rotation = 0
+
+    def update(self):
+        """ To use: self.update()
+        This is the method that will update the movement of the player character. """
+        self.rotation = (self.game.player.position - self.position).angle_to(vec(1, 0))
+
+        self.image = pg.transform.rotate(self.game.zombieImage, self.rotation) # Rotating the mob image as it faces player
+        self.rect = self.image.get_rect()
+        self.rect.center = self.position
+
+        # Movement:
+        self.acceleration = vec(ZOMBIE_SPEED, 0).rotate(-self.rotation)
+        self.acceleration += self.velocity * -1
+        self.velocity += self.acceleration * self.game.dt
+        self.position += self.velocity * self.game.dt + 0.5 * self.acceleration * self.game.dt ** 2
+
+        # Resetting rectangle
+        self.hitRect.centerx = self.position.x
+        collideWithWalls(self, self.game.walls, "x")
+        self.hitRect.centery = self.position.y
+        collideWithWalls(self, self.game.walls, "y")
+
+        self.rect.center = self.hitRect.center
+
+
 class Wall(pg.sprite.Sprite):
+    """ To use: Wall()
+    This class creates walls in the game-- Dependent on the maps."""
     def __init__(self, game, x, y):
         # Setting up the groups
         self.groups = game.allSprites, game.walls
@@ -165,9 +221,10 @@ class Wall(pg.sprite.Sprite):
 
         # Initializing the Game variable
         self.game = game
-        self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
+        self.image = game.wallImage
 
-        self.image.fill(GREEN) # Filling the walls with green
+        # self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
+        # self.image.fill(GREEN) # Filling the walls with green
 
         self.rect = self.image.get_rect()
 
@@ -176,3 +233,4 @@ class Wall(pg.sprite.Sprite):
 
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE
+##################### FINISHED #####################
