@@ -10,6 +10,7 @@
 import pygame as pg
 import random as r
 from os import path
+import pytmx
 
 # Custom imports
 from settings import *
@@ -20,7 +21,7 @@ def collideHitRect(spriteOne, spriteTwo):
     return spriteOne.hitRect.colliderect(spriteTwo.rect)
 # Move FIN
 
-class Map:
+class TextMap:
     """ To use: Map()
      This is the map class, it will load the maps necessary for the game. """
     def __init__(self, filename):
@@ -38,6 +39,38 @@ class Map:
         self.width = self.tileWidth * TILE_SIZE
         self.height = self.tileHeight * TILE_SIZE
 
+class TiledMap:
+    """ To use: TiledMap()
+    This class reads a Tiled map (A map built using the 'Tiled' application. """
+    def __init__(self, filename):
+        tm =  pytmx.load_pygame(filename, pixelalpha = True) # This is loading the file
+
+        # Creating the map width and height:
+        self.width = tm.width * tm.tilewidth
+        self.height = tm.height * tm.tileheight
+
+        self.tmxdata = tm
+
+    def render(self, surface):
+        """ To use: self.render(surface)
+        This method renders the tiles in the map. """
+        ti = self.tmxdata.get_tile_image_by_gid
+
+        for layer in self.tmxdata.visible_layers:
+            if isinstance(layer, pytmx.TiledTileLayer):
+                for x, y, gid, in layer:
+                    tile = ti(gid)
+                    if tile:
+                        surface.blit(tile, (x * self.tmxdata.tilewidth, y * self.tmxdata.tileheight))
+
+    def makeMap(self):
+        """ To use: self.makeMap()
+        This method creates a temporary surface and creates the map. """
+        tempSurface = pg.Surface((self.width, self.height))
+
+        self.render(tempSurface)
+        return tempSurface
+
 class Camera:
     """ To use: Camera()
     This is the Camera class, which will bind the metaphorical camera to the player. """
@@ -51,6 +84,9 @@ class Camera:
         """ To use: self.apply(entity)
         This method that keeps the entity that the camera is bound to in the center of the screen. """
         return entity.rect.move(self.camera.topleft)
+
+    def applyRect(self, rect):
+        return rect.move(self.camera.topleft)
 
     def update(self, target):
         """ To use: self.update(target)

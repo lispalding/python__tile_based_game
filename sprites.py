@@ -27,9 +27,9 @@ def collideWithWalls(sprite, group, dir):
     if dir == "x":
         hits = pg.sprite.spritecollide(sprite, group, False, collideHitRect)
         if hits:
-            if sprite.velocity.x > 0:
+            if hits[0].rect.centerx > sprite.hitRect.centerx:
                 sprite.position.x = hits[0].rect.left - sprite.hitRect.width / 2
-            if sprite.velocity.x < 0:
+            if hits[0].rect.centerx < sprite.hitRect.centerx:
                 sprite.position.x = hits[0].rect.right + sprite.hitRect.width / 2
 
             sprite.velocity.x = 0
@@ -38,9 +38,9 @@ def collideWithWalls(sprite, group, dir):
     if dir == "y":
         hits = pg.sprite.spritecollide(sprite, group, False, collideHitRect)
         if hits:
-            if sprite.velocity.y > 0:
+            if hits[0].rect.centery > sprite.hitRect.centery:
                 sprite.position.y = hits[0].rect.top - sprite.hitRect.height / 2
-            if sprite.velocity.y < 0:
+            if hits[0].rect.centery < sprite.hitRect.centery:
                 sprite.position.y = hits[0].rect.bottom + sprite.hitRect.height / 2
 
             sprite.velocity.y = 0
@@ -67,8 +67,11 @@ class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         super(Player, self).__init__()
 
+        self._layer = PLAYER_LAYER
+
         ## Adding things to groups
         self.groups = game.allSprites
+        pg.sprite.Sprite.__init__(self, self.groups)
 
         self.game = game
 
@@ -81,12 +84,13 @@ class Player(pg.sprite.Sprite):
         # self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
         self.hitRect = PLAYER_HIT_RECT
         self.hitRect.center = self.rect.center
 
         # Including vectors for movement and positioning
         self.velocity = vec(0, 0)
-        self.position = vec(x, y) * TILE_SIZE
+        self.position = vec(x, y)
 
         self.rotation = 0 # This variable tracks how much (how far) the player has rotated. Allowing the sprite to face in more than one direction.
 
@@ -99,6 +103,10 @@ class Player(pg.sprite.Sprite):
         #
         # self.speedx = 0
         # self.speedy = 0
+
+        self.lastShot = 0 # Setting the last shot time
+
+        self.health = PLAYER_HEALTH # Setting up the player health
 
     def getKeys(self):
         """ To use: self.getKeys()
@@ -119,9 +127,25 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.velocity = vec(PLAYER_SPEED, 0).rotate(-self.rotation)
 
-        # If the key pressed is the down arrow key  or the "s" key, do this:
+        # If the key pressed is the down arrow key OR the "s" key, do this:
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.velocity = vec(-PLAYER_SPEED / 2, 0).rotate(-self.rotation)
+
+        # If the key pressed is the space bar, do this:
+        if keys[pg.K_SPACE]:
+            now = pg.time.get_ticks()
+
+            if now - self.lastShot > FIRING_RATE:
+                self.lastShot = now
+
+                direction = vec(1, 0).rotate(-self.rotation)
+                position = self.position + BARREL_OFFSET.rotate(-self.rotation)
+
+                Bullet(self.game, position, direction)
+
+                self.velocity = vec(-KICKBACK, 0).rotate(-self.rotation)
+
+                MuzzleFlash(self.game, position)
 
         # SOLVING DIAGONAL ISSUE: !! NO LONGER NEEDED !!
         # If the x velocity does not equal zero and the y velocity does not equal zero, do this:
@@ -165,6 +189,8 @@ class Zombie(pg.sprite.Sprite):
     """ To use: Zombie()
     This class will create an NPC (In this case, a zombie). """
     def __init__(self, game, x, y):
+        self._layer = ZOMBIE_LAYER
+
         # Setting up the groups
         self.groups = game.allSprites, game.zombieGroup
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -173,11 +199,12 @@ class Zombie(pg.sprite.Sprite):
 
         self.image = game.zombieImage
         self.rect = self.image.get_rect() # Setting up the rectangle
+        self.rect.center = (x, y)
         self.hitRect = ZOMBIE_HIT_RECT.copy()
         self.hitRect.center = self.rect.center
 
         # Setting up movement:
-        self.position = vec(x, y) * TILE_SIZE
+        self.position = vec(x, y)
         self.velocity = vec(0, 0)
         self.acceleration = vec(0, 0)
 
@@ -187,17 +214,37 @@ class Zombie(pg.sprite.Sprite):
         # Setting up the zombie movement
         self.rotation = 0
 
+        # Setting up zombie health
+        self.health = ZOMBIE_HEALTH
+
+        # Setting up zombie speed
+        self.speed = r.choice(ZOMBIE_SPEEDS)
+
+    def avoidZombies(self):
+        """ To use: self.avoidZombies
+        This is the method that tells the zombies to avoid the other zombies. """
+
+        for zombie in self.game.zombieGroup:
+            if zombie != self:
+                distance = self.position - zombie.position
+                if 0 < distance.length() < AVOID_RADIUS:
+                    self.acceleration += distance.normalize()
+
     def update(self):
         """ To use: self.update()
-        This is the method that will update the movement of the player character. """
+        This is the method that will update the movement of the zombie character. """
+        ######### ROTATION START:
         self.rotation = (self.game.player.position - self.position).angle_to(vec(1, 0))
 
         self.image = pg.transform.rotate(self.game.zombieImage, self.rotation) # Rotating the mob image as it faces player
         self.rect = self.image.get_rect()
         self.rect.center = self.position
+        ######### ROTATION FIN
 
-        # Movement:
-        self.acceleration = vec(ZOMBIE_SPEED, 0).rotate(-self.rotation)
+        ######### MOVEMENT START:
+        self.acceleration = vec(1, 0).rotate(-self.rotation)
+        self.avoidZombies()
+        self.acceleration.scale_to_length(self.speed)
         self.acceleration += self.velocity * -1
         self.velocity += self.acceleration * self.game.dt
         self.position += self.velocity * self.game.dt + 0.5 * self.acceleration * self.game.dt ** 2
@@ -209,12 +256,76 @@ class Zombie(pg.sprite.Sprite):
         collideWithWalls(self, self.game.walls, "y")
 
         self.rect.center = self.hitRect.center
+        ######### MOVEMENT FIN
 
+        ######### HEALTH/DEATH START:
+        if self.health <= 0:
+            self.kill()
+        ######### HEALTH/DEATH FIN
+
+    def drawHealth(self):
+        """ To use: drawHealth()
+        This method draws the zombie's health in a health bar above it's head. """
+        #### Setting up the colors
+        if self.health > 60:
+            color = GREEN
+        elif self.health > 30:
+            color =  YELLOW
+        else:
+            color = RED
+
+        #### Setting up the bar itself
+        width = int(self.rect.width * self.health / 100)
+
+        self.healthBar = pg.Rect(0, 0, width, 7)
+        if self.health < 100:
+            pg.draw.rect(self.image, color, self.healthBar)
+
+class Bullet(pg.sprite.Sprite):
+    """ To use: Bullet()
+    This is the Bullet Class. This class controls the bullets being shot by the player."""
+    def __init__(self, game, position, direction):
+        self._layer = BULLET_LAYER
+
+        self.groups = game.allSprites, game.bulletGroup
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.game = game
+
+        self.image = game.bulletImage
+        self.rect = self.image.get_rect()
+
+        self.hitRect = self.rect
+
+        self.position = vec(position)
+        self.rect.center = position
+
+        self.rect.center = position
+
+        spread = r.uniform(-GUN_SPREAD, GUN_SPREAD)
+        self.velocity = direction.rotate(spread) * BULLET_SPEED
+
+        self.spawnTime = pg.time.get_ticks() # Tracking the spawn time so we know when to delete the bullet
+
+    def update(self):
+        """ To use: self.update()
+        This is the method that will update the movement of the bullet. """
+
+        self.position += self.velocity * self.game.dt
+        self.rect.center = self.position
+
+        if pg.sprite.spritecollideany(self, self.game.walls): # Don't care what wall it hits, if it hits any wall do this:
+            self.kill()
+
+        if pg.time.get_ticks() - self.spawnTime > BULLET_LIFESPAN:
+            self.kill()
 
 class Wall(pg.sprite.Sprite):
     """ To use: Wall()
     This class creates walls in the game-- Dependent on the maps."""
     def __init__(self, game, x, y):
+        self._layer = WALL_LAYER
+
         # Setting up the groups
         self.groups = game.allSprites, game.walls
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -233,4 +344,50 @@ class Wall(pg.sprite.Sprite):
 
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE
+
+class Obstacle(pg.sprite.Sprite):
+    """ To use: Wall()
+    This class creates walls in the game-- Dependent on the maps."""
+    def __init__(self, game, x, y, width, height):
+        self._layer = WALL_LAYER
+
+        self.groups = game.walls
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.rect = pg.Rect(x, y, width, height)
+
+        self.x = x
+        self.y = y
+
+        self.rect.x = x
+        self.rect.y = y
+
+class MuzzleFlash(pg.sprite.Sprite):
+    """ To use: MuzzleFlash()
+    This class is the muzzle flash class, it creates the flash of the gun when it fires a bullet."""
+    def __init__(self, game, position):
+        self._layer = EFFECTS_LAYER
+
+        self.groups = game.allSprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.game = game
+
+        # Setting up the rectangle
+        size = r.randint(20, 50)
+        self.image = pg.transform.scale(r.choice(game.gunFlashes), (size, size))
+
+        self.rect = self.image.get_rect()
+
+        # Setting up the position of the flash
+        self.position = position
+        self.rect.center = position
+
+        # Setting up the time the flash stays
+        self.spawnTime = pg.time.get_ticks()
+
+    def update(self):
+        if pg.time.get_ticks() - self.spawnTime > FLASH_DURATION:
+            self.kill()
+
 ##################### FINISHED #####################

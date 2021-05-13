@@ -12,6 +12,11 @@ import random as r
 from os import path
 ################### FINISHED ###################
 
+################ MATH VARIABLE #################
+vec = pg.math.Vector2
+################### FINISHED ###################
+
+
 ########## BASIC VARIABLES ###########
 WIDTH = 1024
 HEIGHT = 668
@@ -35,6 +40,8 @@ CHARACTERS_SPRITESHEET = "spritesheet_characters.png"
 
 ########## PLAYER VARIABLES ###########
 ######### PLAYER SETTINGS ##########
+PLAYER_HEALTH = 100
+
 PLAYER_SPEED = 300
 PLAYER_ROTATION_SPEED = 250
 
@@ -44,12 +51,22 @@ PLAYER_HEIGHT = 64
 PLAYER_IMAGE = "manBlue_gun.png"
 
 PLAYER_HIT_RECT = pg.Rect(0, 0, 35, 35)
+
+BARREL_OFFSET = vec(30, 10)
 ############ FINISHED #############
 
 ######### BULLET SETTINGS ##########
-BULLET_IMAGE = ""
+BULLET_IMAGE = "bullet.png"
 
-BULLET_SPEED = 250
+BULLET_SPEED = 500
+BULLET_LIFESPAN = 1000
+
+FIRING_RATE = 150
+
+KICKBACK = 200
+GUN_SPREAD = 5
+
+BULLET_DAMAGE = 10
 ############ FINISHED #############
 ############## FINISHED ###############
 
@@ -61,20 +78,42 @@ WALL_IMAGE = "tileGreen_39.png"
 ######### ZOMBIE SETTINGS #########
 ZOMBIE_IMAGE = "zoimbie1_hold.png"
 
-ZOMBIE_SPEED = 150
+ZOMBIE_SPEEDS = [150, 100, 75, 125, 150]
 
 ZOMBIE_HIT_RECT = pg.Rect(0, 0, 30, 30)
+
+ZOMBIE_HEALTH = 100
+ZOMBITE = 10
+ZOMBITE_KNOCKBACK = 20
+
+AVOID_RADIUS = 50
 ############ FINISHED #############
+############## FINISHED ###############
+
+###### SPECIAL EFFECTS VARIABLES ######
+########### GUN EFFECTS ###########
+MUZZLE_FLASHES = ["whitePuff15.png", "whitePuff16.png", "whitePuff17.png", "whitePuff18.png"]
+
+FLASH_DURATION = 40
+############ FINISHED #############
+############## FINISHED ###############
+
+################ LAYERS ################
+WALL_LAYER = 1
+PLAYER_LAYER = 2
+BULLET_LAYER = 3
+ZOMBIE_LAYER = 2
+EFFECTS_LAYER = 4
 ############## FINISHED ###############
 
 ######### FOLDER SETUP #########
 gameFolder = path.dirname(__file__) # General folder set-up
 
-# Map folder
+# Map folders
 mapsFolder = path.join(gameFolder, "maps")
 
-## Individual maps folders
-map1File = path.join(mapsFolder, "map.txt")
+textMapsFolder = path.join(mapsFolder, "textfile_maps")
+firstTiledMapFolder = path.join(mapsFolder, "map1_tiled")
 
 ## Basic image folders
 imageFolder = path.join(gameFolder, "images")
@@ -110,12 +149,13 @@ ORANGE = (242, 162, 41)
 MINT = (63, 232, 159)
 PURPLE = (182, 103, 224)
 PINK = (224, 103, 139)
-YELLOW = (245, 233, 154)
+YELLOW = (252, 240, 3)
 BROWN = (106, 55, 5)
 
 LIGHT_GREY = (100, 100, 100)
 YELLOW_GREEN = (182, 219, 18)
 LIGHT_BLUE = (100, 162, 209)
+PALE_YELLOW = (245, 233, 154)
 
 # Shortcut colors
 BG_COLOR = BROWN
